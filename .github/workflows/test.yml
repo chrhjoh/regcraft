@@ -1,0 +1,42 @@
+name: Test Python
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - src/**
+      - tests/**
+      - .github/workflows/test.yml
+
+    # Called by the release workflow
+    workflow_call:
+      inputs:
+        sha:
+          description: Commit SHA to test
+          type: string
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.sha }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+
+      - name: Install uv and set the Python version
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install the project
+        run: uv sync --locked --dev
+
+      - name: Run tests
+        run: uv run pytest

@@ -1,10 +1,16 @@
 [project]
 name = "regkit"
 version = "0.1.0"
+requires-python = ">=3.12"
+
 description = "Swiss-army knife for danish registries"
 readme = "README.md"
 authors = [
 {name = "BrunakLab"}
+]
+dependencies = [
+    "click>=8.5.0",
+    "polars>=2.1.0",
 ]
     
 [build-system]
@@ -14,7 +20,15 @@ build-backend = "setuptools.build_meta"
 [project.scripts]
 regkit = "regkit.cli:cli"
 
+[tool.uv.build-backend]
+module-name = "regkit"
 
+[dependency-groups]
+dev = [
+    "pyrefly>=1.4.1",
+    "pytest>=9.2.0",
+    "ruff>=0.17.4",
+]
+    
 [tool.pyrefly]
-site-package-path = ["/opt/editor-env/lib/python3.13/site-packages"]
-
+project-includes = ["src", "tests"]
