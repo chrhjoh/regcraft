@@ -2,8 +2,8 @@ from enum import StrEnum, auto
 
 import polars as pl
 
-from regkit.registries.columns import CprCols
-from regkit.registries.combine import DiagAdmCols, LsrCols
+from regcraft.registries.columns import CprCols
+from regcraft.registries.combine import DiagAdmCols, LsrCols
 
 
 class Split(StrEnum):

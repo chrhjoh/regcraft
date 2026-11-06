@@ -1,15 +1,14 @@
-name: Release Python on PyPi
+name: Release Python on PyPI
 
 on:
   workflow_dispatch:
     inputs:
-      # Latest commit to include with the release. If omitted, use the latest commit on the main branch.
       sha:
-        description: Commit SHA
+        description: Commit SHA (defaults to latest commit on main)
         type: string
-      # do not publish to PyPI / GitHub.
+        required: false
       dry-run:
-        description: Dry run
+        description: Build and test without publishing
         type: boolean
         default: false
 
@@ -17,77 +16,85 @@ jobs:
   test:
     uses: ./.github/workflows/test.yml
     with:
-      sha: ${{ inputs.sha }}
+      sha: ${{ inputs.sha || github.sha }}
 
   build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
     steps:
       - name: Checkout
-      - uses: actions/checkout@v7
+        uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.sha }}
+          ref: ${{ inputs.sha || github.sha }}
 
       - name: Install uv
-        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
         with:
           enable-cache: false
+
+      - name: Get version
+        id: version
+        run: |
+          echo "version=$(uv version --short)" >> "$GITHUB_OUTPUT"
 
       - name: Build
         run: uv build
 
-      - name: Upload distributions as artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - name: Upload distributions
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: dist
           path: dist/
+          if-no-files-found: error
 
   publish:
     needs:
-      - build
       - test
+      - build
+
     runs-on: ubuntu-latest
+
     environment:
       name: pypi
+      url: https://pypi.org/project/${{ github.event.repository.name }}/
+
     permissions:
       id-token: write
+      contents: write
+
     steps:
       - name: Install uv
-        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
         with:
           enable-cache: false
 
-      - name: Download distributions artifact
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - name: Download distributions
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: dist
           path: dist/
 
       - name: Generate PEP 740 attestations
-        uses: astral-sh/attest-action@39b6ce43875c196a579e31635b11aa2a2036384a # v0.0.7
+        if: ${{ !inputs.dry-run }}
+        uses: astral-sh/attest-action@39b6ce43875c196a579e31635b11aa2a2036384a
 
-      - name: Publish
-        if: inputs.dry-run == false
+      - name: Publish to PyPI
+        if: ${{ !inputs.dry-run }}
         run: uv publish
 
       - name: Create GitHub release
-        id: github-release
-        uses: release-drafter/release-drafter@v6
-        with:
-          config-name: release-drafter-python.yml
-          name: Python Polars ${{ steps.version.outputs.version }}
-          tag: py-${{ steps.version.outputs.version }}
-          version: ${{ steps.version.outputs.version }}
-          prerelease: ${{ steps.version.outputs.is_prerelease }}
-          commitish: ${{ inputs.sha || github.sha }}
-          disable-autolabeler: true
+        if: ${{ !inputs.dry-run }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish GitHub release
-        if: inputs.dry-run == false
-        run: gh release edit $TAG --draft=false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.github-release.outputs.tag_name }}
+          VERSION: ${{ needs.build.outputs.version }}
+          COMMIT_SHA: ${{ inputs.sha || github.sha }}
+        run: |
+          gh release create "v${VERSION}" dist/* \
+            --title "${GITHUB_REPOSITORY#*/} ${VERSION}" \
+            --generate-notes \
+            --target "${COMMIT_SHA}"

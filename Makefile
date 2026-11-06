@@ -19,7 +19,7 @@ test:
 build:
 	uv build --no-sources
 
-precommit: lint format-check typecheck test build
+precommit: lint format-check typecheck test
 
 clean:
 	rm -rf dist build *.egg-info .pytest_cache .ruff_cache

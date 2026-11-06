@@ -1,7 +1,7 @@
 import click
 
-from regkit.io import write_parquet
-from regkit.registries.fetchers.factory import (
+from regcraft.io import write_parquet
+from regcraft.registries.fetchers.factory import (
     FetcherType,
     RegistryVersion,
     get_registryfetcher,

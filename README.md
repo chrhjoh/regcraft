@@ -1,5 +1,7 @@
-# RegKit
+# RegCraft
+
+RegCraft is in very early stages, take that as a warning
 
 ## Installation
 
-TODO
+RegCraft can be installed through PyPi

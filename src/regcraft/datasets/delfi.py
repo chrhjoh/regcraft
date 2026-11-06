@@ -7,9 +7,9 @@ from typing import Any
 
 import polars as pl
 
-from regkit.code_schemes import CodeQuery, atc_chapter, icd10_chapter
-from regkit.code_schemes.parse import format_atc, format_icd10
-from regkit.datasets.utils import (
+from regcraft.code_schemes import CodeQuery, atc_chapter, icd10_chapter
+from regcraft.code_schemes.parse import format_atc, format_icd10
+from regcraft.datasets.utils import (
     LongEhrCols,
     Split,
     common_cpr_filters,
@@ -19,9 +19,9 @@ from regkit.datasets.utils import (
     filter_study_age,
     split_dataset,
 )
-from regkit.io import write_parquet, write_sharded_parquet, write_txt
-from regkit.registries.columns import CprCols
-from regkit.registries.combine import DiagAdmCols, LsrCols, coallese_diag_adm_dates
+from regcraft.io import write_parquet, write_sharded_parquet, write_txt
+from regcraft.registries.columns import CprCols
+from regcraft.registries.combine import DiagAdmCols, LsrCols, coallese_diag_adm_dates
 
 
 class DelfiCategory(Enum):

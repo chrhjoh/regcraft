@@ -3,7 +3,7 @@ from datetime import date
 import polars as pl
 import pytest
 
-from regkit.polars import convert_dates
+from regcraft.polars import convert_dates
 
 
 def test_convert_dates():

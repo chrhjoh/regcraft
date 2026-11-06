@@ -1,7 +1,7 @@
 import click
 import polars as pl
 
-from regkit.datasets.delfi import build_delfi_dataset
+from regcraft.datasets.delfi import build_delfi_dataset
 
 
 @click.group()

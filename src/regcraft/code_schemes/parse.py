@@ -1,6 +1,6 @@
 import polars as pl
 
-from regkit.registries.combine import DiagAdmCols, LsrCols
+from regcraft.registries.combine import DiagAdmCols, LsrCols
 
 
 def format_icd10(icd_level: int):

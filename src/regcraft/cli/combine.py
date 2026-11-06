@@ -3,9 +3,9 @@ from typing import Any
 import click
 import polars as pl
 
-from regkit.io import write_parquet
-from regkit.registries.columns import Lpr2AdmCols
-from regkit.registries.combine import join_diag_adm, join_lsr
+from regcraft.io import write_parquet
+from regcraft.registries.columns import Lpr2AdmCols
+from regcraft.registries.combine import join_diag_adm, join_lsr
 
 
 @click.group()

@@ -3,7 +3,7 @@ from enum import StrEnum, auto
 
 import polars as pl
 
-from regkit.registries.fetchers.lsr import EpikurCols
+from regcraft.registries.fetchers.lsr import EpikurCols
 
 
 class LsrCols(StrEnum):

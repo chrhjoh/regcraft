@@ -1,5 +1,5 @@
 [project]
-name = "regkit"
+name = "regcraft"
 version = "0.1.0"
 requires-python = ">=3.12"
 
@@ -18,10 +18,10 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project.scripts]
-regkit = "regkit.cli:cli"
+regcraft = "regcraft.cli:cli"
 
 [tool.uv.build-backend]
-module-name = "regkit"
+module-name = "regcraft"
 
 [dependency-groups]
 dev = [

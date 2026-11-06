@@ -1,5 +1,5 @@
-import regkit.registries.columns as cols
-from regkit.registries.fetchers.factory import FetcherType, RegistryFetcher, fetcher
+import regcraft.registries.columns as cols
+from regcraft.registries.fetchers.factory import FetcherType, RegistryFetcher, fetcher
 
 
 @fetcher(registry_type=FetcherType.CPR)

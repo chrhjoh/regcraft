@@ -6,7 +6,7 @@ from pathlib import Path
 import polars as pl
 from polars import LazyFrame
 
-from regkit.polars import convert_dates
+from regcraft.polars import convert_dates
 
 
 class RegistryVersion(StrEnum):

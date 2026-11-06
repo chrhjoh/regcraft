@@ -3,7 +3,7 @@ from pathlib import Path
 
 import polars as pl
 
-from regkit.registries.fetchers.factory import (
+from regcraft.registries.fetchers.factory import (
     FetcherType,
     RegistryFetcher,
     RegistryVersion,

@@ -1,8 +1,8 @@
 import click
 
-import regkit.cli.combine as c
-import regkit.cli.dataset as d
-import regkit.cli.fetch as f
+import regcraft.cli.combine as c
+import regcraft.cli.dataset as d
+import regcraft.cli.fetch as f
 
 
 @click.group()
