@@ -49,11 +49,12 @@ def icd10_chapter(code: str) -> CodeMetadata:
         (None, None),
     )
 
-    return {
-        "code": code,
-        "category": chapter[0],
-        "description": chapter[1],
-    }
+    return CodeMetadata(
+        code,
+        CodeType.ICD10,
+        chapter[0],
+        chapter[1],
+    )
 
 
 ATC_CHAPTERS: Mapping[str, tuple[int, str]] = {
@@ -79,11 +80,12 @@ def atc_chapter(code: str) -> CodeMetadata:
     code = code.strip().upper()
     chapter = ATC_CHAPTERS.get(code[0])
 
-    return {
-        "code": code,
-        "category": chapter[0] if chapter else None,
-        "description": chapter[1] if chapter else None,
-    }
+    return CodeMetadata(
+        code,
+        CodeType.ATC,
+        chapter[0] if chapter is not None else None,
+        chapter[1] if chapter is not None else None,
+    )
 
 
 def code_to_chapter(code: str, code_type: CodeType) -> CodeMetadata:
