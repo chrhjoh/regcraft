@@ -1,8 +1,8 @@
-from enum import StrEnum, auto
 from pathlib import Path
 
 import polars as pl
 
+from regcraft.registries.columns import EpikurCols, LaegemiddelCols
 from regcraft.registries.fetchers.factory import (
     FetcherType,
     RegistryFetcher,
@@ -10,11 +10,6 @@ from regcraft.registries.fetchers.factory import (
     default_scanner,
     fetcher,
 )
-
-
-class LaegemiddelCols(StrEnum):
-    atc = auto()
-    item_id = auto()
 
 
 @fetcher(registry_type=FetcherType.LAEGEMIDDEL)
@@ -45,12 +40,6 @@ class LaegemiddelRegistryFetcher(RegistryFetcher):
 
         df = pl.from_dicts(data, schema={"vnr": pl.Int64, "atc": pl.Utf8})
         return df.lazy()
-
-
-class EpikurCols(StrEnum):
-    cpr_enc = auto()
-    item_id = auto()
-    date = auto()
 
 
 @fetcher(registry_type=FetcherType.EPIKUR)
