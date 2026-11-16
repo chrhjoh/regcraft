@@ -48,7 +48,7 @@ class SequencesCols(StrEnum):
 
 class CovariatesCols(StrEnum):
     patient_id = auto()
-    time_days = auto()  # TODO: is this correct?
+    time_days = auto()
     feature_id = auto()
     value_ = auto()
 
@@ -162,7 +162,7 @@ def preprocess_diag_adms(
         excluded_chapters=excluded_chapters,
     )
 
-    diag_adms.with_columns(format_icd10(icd_level).alias(token))
+    diag_adms = diag_adms.with_columns(format_icd10(icd_level).alias(token))
 
     if not reccuring_codes:
         diag_adms = diag_adms.group_by([cpr_enc, token]).agg(pl.col(date).min())
@@ -200,7 +200,7 @@ def build_token_attributes(
         token_attributes.append(
             {
                 TokenAttrCols.token.value: t.token,
-                TokenAttrCols.category_id.value: t.category_id,
+                TokenAttrCols.category_id.value: t.category_id.value,
                 TokenAttrCols.modality_id.value: modality_id,
                 TokenAttrCols.class_id.value: t.class_id,
             }
@@ -246,7 +246,7 @@ def build_covariates(cpr: pl.LazyFrame, male: Any = "M"):
 
 
 def preprocess_death_data(cpr: pl.LazyFrame):
-    status_date = CprCols.status_code
+    status_date = CprCols.status_date
     return cpr.filter(
         pl.col(CprCols.status_code).eq(90) & pl.col(status_date).is_not_null()
     ).select(
@@ -343,7 +343,7 @@ def build_delfi_dataset(
     cpr = preprocess_cpr(cpr)
     data_sources.append(preprocess_death_data(cpr))
 
-    if lsr:
+    if lsr is not None:
         lsr = preprocess_lsr(lsr, atc_level=atc_token_level)
         lsr = filter_by_occurrence(lsr, min_atc_tokens)
         lsr_tokens = extract_delfi_tokens(
@@ -354,7 +354,7 @@ def build_delfi_dataset(
         )
         data_sources.append(lsr)
         tokens.extend(lsr_tokens)
-    if diag_adms:
+    if diag_adms is not None:
         diag_adms = preprocess_diag_adms(diag_adms, icd_level=icd10_token_level)
         diag_adms = filter_by_occurrence(diag_adms, min_icd10_tokens)
         diag_tokens = extract_delfi_tokens(
