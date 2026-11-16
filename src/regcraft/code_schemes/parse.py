@@ -21,5 +21,5 @@ def _format_code(
 ):
     expr = pl.col(col).str.slice(start, length)
     if prefix is not None:
-        expr = pl.concat_str([prefix, expr], separator=separator)
+        expr = pl.concat_str([pl.lit(prefix), expr], separator=separator)
     return expr
