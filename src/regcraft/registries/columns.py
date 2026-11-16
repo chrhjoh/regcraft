@@ -16,6 +16,7 @@ class CprCols(BaseCols):
     status_date = auto()
     sex = auto()
 
+    @classmethod
     def schema(cls) -> pl.Schema:
         return pl.Schema(
             {
@@ -34,6 +35,7 @@ class Lpr2DiagCols(BaseCols):
     diag = auto()
     diag_additional = auto()
 
+    @classmethod
     def schema(cls) -> pl.Schema:
         return pl.Schema(
             {
@@ -54,6 +56,7 @@ class Lpr2AdmCols(BaseCols):
     lpr_origin = auto()
     contact_type = auto()
 
+    @classmethod
     def schema(cls) -> pl.Schema:
         return pl.Schema(
             {
@@ -75,6 +78,7 @@ class Lpr3DiagCols(BaseCols):
     lpr_origin = auto()
     diag_additional = auto()
 
+    @classmethod
     def schema(cls) -> pl.Schema:
         return pl.Schema(
             {
@@ -95,6 +99,7 @@ class Lpr3ContactCols(BaseCols):
     patient_type = auto()
     contact_type = auto()
 
+    @classmethod
     def schema(cls) -> pl.Schema:
         return pl.Schema(
             {
@@ -112,6 +117,7 @@ class LaegemiddelCols(BaseCols):
     atc = auto()
     item_id = auto()
 
+    @classmethod
     def schema(cls) -> pl.Schema:
         return pl.Schema(
             {
@@ -121,11 +127,12 @@ class LaegemiddelCols(BaseCols):
         )
 
 
-class EpikurCols(StrEnum):
+class EpikurCols(BaseCols):
     cpr_enc = auto()
     item_id = auto()
     date = auto()
 
+    @classmethod
     def schema(cls) -> pl.Schema:
         return pl.Schema(
             {
