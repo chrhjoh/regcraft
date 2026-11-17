@@ -49,8 +49,12 @@ def fetch(
     version: RegistryVersion | None,
     fetcher_type: FetcherType | None,
 ):
-    version = version if version else RegistryVersion.from_path(input_path)
-    fetcher_type = fetcher_type if fetcher_type else FetcherType.from_path(input_path)
+    version = (
+        RegistryVersion(version) if version else RegistryVersion.from_path(input_path)
+    )
+    fetcher_type = (
+        FetcherType(fetcher_type) if fetcher_type else FetcherType.from_path(input_path)
+    )
     fetcher = get_registryfetcher(fetcher_type)(version=version)
 
     lf = fetcher.parse(input_path)

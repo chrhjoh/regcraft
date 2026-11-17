@@ -2,8 +2,9 @@ from datetime import date
 
 import polars as pl
 import pytest
+from polars.testing import assert_series_equal
 
-from regcraft.polars import convert_dates
+from regcraft.polars import coallese_dates, convert_dates
 
 
 def test_convert_dates():
@@ -68,3 +69,21 @@ def test_convert_dates_strict():
 
     with pytest.raises(pl.exceptions.InvalidOperationError):
         convert_dates(lf, strict=True).collect()
+
+
+def test_coallese_diag_adm_dates():
+    df = pl.DataFrame(
+        {
+            "default": [None, date(2020, 1, 1), None],
+            "fallback": [date(2021, 1, 1), date(2021, 1, 1), None],
+        }
+    )
+
+    result = df.select(coallese_dates("default", "fallback")).to_series()
+
+    expected = pl.Series(
+        "default",
+        [date(2021, 1, 1), date(2020, 1, 1), None],
+    )
+
+    assert_series_equal(result, expected)

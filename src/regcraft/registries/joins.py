@@ -1,32 +1,15 @@
 from collections.abc import Iterable
-from enum import StrEnum, auto
 from typing import Any
 
 import polars as pl
 
-from regcraft.registries.columns import Lpr2AdmCols, Lpr3ContactCols
+from regcraft.registries.columns import (
+    DiagAdmCols,
+    Lpr2AdmCols,
+    Lpr3ContactCols,
+    LsrCols,
+)
 from regcraft.registries.fetchers.lsr import EpikurCols
-
-
-class LsrCols(StrEnum):
-    cpr_enc = auto()
-    atc = auto()
-    date = auto()
-
-
-class DiagAdmCols(StrEnum):
-    cpr_enc = auto()
-    diag = auto()
-    diag_type = auto()
-    date_start = auto()
-    date_end = auto()
-
-
-def coallese_diag_adm_dates(
-    default: str,
-    fallback: str,
-) -> pl.Expr:
-    return pl.col(default).fill_null(pl.col(fallback))
 
 
 def _join_select(

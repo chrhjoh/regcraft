@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from datetime import date
+from datetime import date, timedelta
 from random import Random
 
 import polars as pl
@@ -81,15 +81,16 @@ def _mock_common_adm(
     start_date: date,
     end_date: date,
     rng: Random,
+    contact_span_days: int = 14,
 ) -> dict[str, Sequence[str | int | None | date]]:
+    start_days = gen.mock_date(nrows, rng, start=start_date, end=end_date)
+
     return {
         c.Lpr2AdmCols.cpr_enc: _resolve_long_cpr_enc(nrows, patients),
-        c.Lpr2AdmCols.date_start: gen.mock_date(
-            nrows, rng, start=start_date, end=end_date
-        ),
-        c.Lpr2AdmCols.date_end: gen.mock_date(
-            nrows, rng, start=start_date, end=end_date
-        ),
+        c.Lpr2AdmCols.date_start: start_days,
+        c.Lpr2AdmCols.date_end: [
+            d + timedelta(days=contact_span_days) for d in start_days
+        ],
         c.Lpr2AdmCols.record_number: gen.mock_int_sequence(nrows),
         c.Lpr2AdmCols.patient_type: gen.mock_choice(
             nrows, rng=rng, choices=["In", "Out"]
@@ -177,11 +178,13 @@ def mock_epikur(
             c.EpikurCols.date: gen.mock_date(
                 nrows, rng=rng, start=date(2000, 1, 1), end=date(2024, 12, 31)
             ),
-        }
+        },
+        schema=c.EpikurCols.schema(),
     )
 
 
 def mock_laegemiddel() -> pl.LazyFrame:
     return pl.LazyFrame(
-        {c.LaegemiddelCols.item_id: ITEM_IDS, c.LaegemiddelCols.atc: ATCS}
+        {c.LaegemiddelCols.atc: ATCS, c.LaegemiddelCols.item_id: ITEM_IDS},
+        schema=c.LaegemiddelCols.schema(),
     )

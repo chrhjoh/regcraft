@@ -3,7 +3,7 @@ from enum import StrEnum, auto
 import polars as pl
 
 from regcraft.registries.columns import CprCols
-from regcraft.registries.combine import DiagAdmCols, LsrCols
+from regcraft.registries.joins import DiagAdmCols, LsrCols
 
 
 class Split(StrEnum):
@@ -26,6 +26,7 @@ def filter_by_occurrence(lf: pl.LazyFrame, min_count: int, col: str = "token"):
         .filter(pl.col.n.ge(min_count))
         .collect()
         .get_column(col)
+        .to_list()
     )
     return lf.filter(pl.col(col).is_in(allowed_tokens))
 
@@ -33,7 +34,7 @@ def filter_by_occurrence(lf: pl.LazyFrame, min_count: int, col: str = "token"):
 def split_dataset(
     lf: pl.LazyFrame, val: float, test: float, seed: int | None = None
 ) -> dict[Split, pl.LazyFrame]:
-    if val + test >= 1:
+    if val + test > 1:
         raise ValueError()
     lf = (
         lf.with_columns(
@@ -63,7 +64,7 @@ def split_dataset(
 
 
 def common_cpr_filters(cpr: pl.LazyFrame, included_status_codes: list[int] | None):
-    """Filters null birthdates and common status"""
+    """Filters null birthdates and only includes common status 1, 80, and 90"""
     included_status_codes = included_status_codes or [1, 80, 90]
 
     return cpr.filter(
@@ -81,11 +82,13 @@ def filter_study_age(
     max_age: int = 120,
 ):
     """Only include if age is between min and max at reference date"""
+    reference_date = pl.date(year=year, month=month, day=day)
+
     return cpr.filter(
-        pl.date(year=year, month=month, day=day)
-        .sub(pl.col(CprCols.birthdate))
-        .dt.total_days()
-        .is_between(min_age * 365.25, max_age * 365.25)
+        pl.col(CprCols.birthdate).is_between(
+            reference_date.dt.offset_by(f"-{max_age}y"),
+            reference_date.dt.offset_by(f"-{min_age}y"),
+        )
     )
 
 
@@ -107,6 +110,9 @@ def common_diag_adm_filter(
 
     if included_diag_types is None:
         included_diag_types = ["A", "B"]
+
+    included_diag_types = [c.upper() for c in included_diag_types]
+    excluded_chapters = [c.upper() for c in excluded_chapters]
     diag_adm = diag_adm.filter(
         pl.col(DiagAdmCols.diag_type).str.to_uppercase().is_in(included_diag_types)
         & pl.col(diag)

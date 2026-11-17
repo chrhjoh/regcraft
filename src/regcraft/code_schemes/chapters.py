@@ -1,6 +1,10 @@
+import re
 from collections.abc import Mapping
 
 from .types import CodeMetadata, CodeType
+
+ATC_PATTERN = re.compile(r"[A-Z](?:[0-9]{2}(?:[A-Z]{0,2}[0-9]{0,2})?)?")
+ICD10_PATTERN = re.compile(r"[A-Z][0-9]{2}[0-9A-Z]?")
 
 ICD10_CHAPTERS = {
     1: ("A00", "B99", "Certain infectious and parasitic diseases"),
@@ -38,6 +42,8 @@ ICD10_CHAPTERS = {
 
 def icd10_chapter(code: str) -> CodeMetadata:
     code = code.strip().upper().replace(".", "")
+    if not ICD10_PATTERN.fullmatch(code):
+        raise ValueError(f"Invalid ICD-10 code: {code}")
     category = code[:3]
 
     chapter = next(
@@ -78,6 +84,9 @@ ATC_CHAPTERS: Mapping[str, tuple[int, str]] = {
 def atc_chapter(code: str) -> CodeMetadata:
     """Map an ATC code to its chapter index and description."""
     code = code.strip().upper()
+    if not ATC_PATTERN.fullmatch(code):
+        raise ValueError(f"Invalid ATC code: {code}")
+
     chapter = ATC_CHAPTERS.get(code[0])
 
     return CodeMetadata(

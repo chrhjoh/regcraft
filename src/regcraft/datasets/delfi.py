@@ -20,8 +20,9 @@ from regcraft.datasets.utils import (
     split_dataset,
 )
 from regcraft.io import write_parquet, write_sharded_parquet, write_txt
+from regcraft.polars import coallese_dates
 from regcraft.registries.columns import CprCols
-from regcraft.registries.combine import DiagAdmCols, LsrCols, coallese_diag_adm_dates
+from regcraft.registries.joins import DiagAdmCols, LsrCols
 
 
 class DelfiCategory(Enum):
@@ -111,7 +112,7 @@ def extract_delfi_tokens(
         DelfiToken(
             token=c,
             category_id=category,
-            modality_id=metadata_fn(c.lstrip(strip_prefix)).category,
+            modality_id=metadata_fn(c.removeprefix(strip_prefix)).category,
         )
         for c in codes
     ]
@@ -131,7 +132,7 @@ def preprocess_cpr(
 def preprocess_lsr(lsr: pl.LazyFrame, atc_level: int):
     token = LongEhrCols.token
     lsr = common_lsr_filter(lsr).with_columns(
-        format_atc(atc_level).alias(token),
+        format_atc(atc_level, prefix="ATC").alias(token),
     )
 
     return lsr.select(
@@ -147,13 +148,14 @@ def preprocess_diag_adms(
     reccuring_codes: bool = False,
     default_date: str = DiagAdmCols.date_start,
     fallback_date: str = DiagAdmCols.date_end,
+    level4_dot: bool = False,
 ):
     cpr_enc = DiagAdmCols.cpr_enc
     token = LongEhrCols.token
     date = LongEhrCols.date
 
     diag_adms = diag_adms.with_columns(
-        coallese_diag_adm_dates(default_date, fallback_date).alias(date)
+        coallese_dates(default_date, fallback_date).alias(date)
     )
 
     diag_adms = common_diag_adm_filter(
@@ -162,7 +164,9 @@ def preprocess_diag_adms(
         excluded_chapters=excluded_chapters,
     )
 
-    diag_adms = diag_adms.with_columns(format_icd10(icd_level).alias(token))
+    diag_adms = diag_adms.with_columns(
+        format_icd10(icd_level, include_dot=level4_dot, prefix="ICD10").alias(token)
+    )
 
     if not reccuring_codes:
         diag_adms = diag_adms.group_by([cpr_enc, token]).agg(pl.col(date).min())
@@ -184,6 +188,7 @@ def build_token_attributes(
     tokens: Iterable[DelfiToken],
     use_modality_id: bool = False,
 ) -> pl.DataFrame:
+    tokens = list(tokens)
 
     if use_modality_id:
         modality_max = _get_largest_modality_groups(tokens)
@@ -195,7 +200,11 @@ def build_token_attributes(
         # use category_id as default if not using modality_id
         modality_id = t.category_id.value
         if use_modality_id and modality_max is not None:
-            modality_id = t.modality_id or modality_max[t.category_id.value] + 1
+            modality_id = (
+                t.modality_id
+                if t.modality_id is not None
+                else modality_max[t.category_id.value] + 1
+            )
 
         token_attributes.append(
             {
@@ -206,7 +215,7 @@ def build_token_attributes(
             }
         )
 
-    return pl.DataFrame(token_attributes)
+    return pl.DataFrame(token_attributes).sort(TokenAttrCols.token)
 
 
 def build_candidate_texts(
@@ -219,7 +228,7 @@ def build_candidate_texts(
     if not include_extra_token:
         tokens = [t for t in tokens if t.category_id != DelfiCategory.EXTRA]
 
-    return [t.token for t in tokens]
+    return sorted([t.token for t in tokens])
 
 
 def build_covariates(cpr: pl.LazyFrame, male: Any = "M"):
@@ -294,8 +303,8 @@ def filter_dataset_timeperiods(
 
 def dataset_to_sequences(dataset: pl.LazyFrame):
     return (
-        dataset.sort(LongEhrCols.age_days)
-        .group_by(SequencesCols.patient_id)
+        dataset.sort(LongEhrCols.patient_id, LongEhrCols.age_days)
+        .group_by(SequencesCols.patient_id, maintain_order=True)
         .agg(
             pl.col.token.alias(SequencesCols.event_texts),
             pl.col.age_days.alias(SequencesCols.times_days),
@@ -310,7 +319,7 @@ def _split_covariates_by_dataset(
     patient_id = SequencesCols.patient_id
     splits = {}
     for split, dataset in dataset_splits.items():
-        ids = dataset.select(patient_id).collect().get_column(patient_id)
+        ids = dataset.select(patient_id).collect().get_column(patient_id).to_list()
         splits[split] = covariates.filter(pl.col(patient_id).is_in(ids))
 
     return splits
@@ -368,10 +377,10 @@ def build_delfi_dataset(
 
     dataset = _calculate_age_days(
         pl.concat(data_sources).join(cpr, on=LongEhrCols.patient_id)
-    )
+    ).sort(pl.col(LongEhrCols.patient_id))
     dataset = filter_dataset_timeperiods(dataset)
     sequences = dataset_to_sequences(dataset)
-    splits = split_dataset(sequences, test=test_percent, val=val_percent)
+    splits = split_dataset(sequences, test=test_percent, val=val_percent, seed=seed)
 
     covariates, feature_map = build_covariates(cpr)
 
