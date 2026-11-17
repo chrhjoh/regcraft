@@ -54,8 +54,8 @@ class Lpr3DiagRegistryFetcher(RegistryFetcher):
     def _post_rename(self, lf: LazyFrame):
         later_disproven = "senere_afkraeftet"
         return lf.with_columns(
-            pl.lit(None, dtype=pl.Int64).alias(self.cols.diag_additional),
-        ).filter(pl.col(later_disproven).str.to_lowercase().ne("ja"))
+            pl.lit(None, dtype=pl.Utf8).alias(self.cols.diag_additional),
+        ).filter(pl.col(later_disproven).str.to_lowercase().ne("ja").fill_null(True))
 
     def column_norm_mapping(self):
         record_number = "dw_ek_kontakt"

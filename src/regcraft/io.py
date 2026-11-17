@@ -1,4 +1,3 @@
-import os
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -10,6 +9,8 @@ def write_sharded_parquet(
     output_dir: str | Path,
     shard_size: int = 100_000,
 ) -> None:
+    if shard_size <= 0:
+        raise ValueError("shard_size must be positive")
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -20,7 +21,7 @@ def write_sharded_parquet(
 
 
 def write_parquet(lf: pl.LazyFrame, output_path: str, collect: bool = False):
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     if collect:
         lf.collect().write_parquet(output_path)
     else:
@@ -28,6 +29,6 @@ def write_parquet(lf: pl.LazyFrame, output_path: str, collect: bool = False):
 
 
 def write_txt(lines: Iterable[str], output_path: str, separator="\n"):
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w") as fh:
         fh.write(separator.join(lines))

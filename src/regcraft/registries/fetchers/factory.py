@@ -38,13 +38,13 @@ class FetcherType(StrEnum):
                 return FetcherType.LAEGEMIDDEL
             case "t_person":
                 return FetcherType.CPR
-            case "LPR2DIAG":
+            case "t_diag":
                 return FetcherType.LPR2DIAG
-            case "LPR2ADM":
+            case "t_adm":
                 return FetcherType.LPR2ADM
-            case "LPR3CONTACT":
+            case "kontakter":
                 return FetcherType.LPR3CONTACT
-            case "LPR3DIAG":
+            case "diagnoser":
                 return FetcherType.LPR3DIAG
 
         raise ValueError(f"Could not determine registries version of {path}")
@@ -107,6 +107,7 @@ def fetcher(
         if registry_type in Fetchers:
             raise ValueError(f"Already registered registry {registry_type}")
         Fetchers[registry_type] = registry
+        return registry
 
     return decorator
 

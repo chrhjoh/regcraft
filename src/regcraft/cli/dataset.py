@@ -22,8 +22,8 @@ def dataset() -> None:
     "output_dir",
     type=click.Path(
         exists=False,
-        file_okay=True,
-        dir_okay=False,
+        file_okay=False,
+        dir_okay=True,
     ),
 )
 @click.option(
@@ -38,8 +38,15 @@ def dataset() -> None:
 @click.option("--icd10-token-level", type=int, default=3, show_default=True)
 @click.option("--min-atc-tokens", type=int, default=5, show_default=True)
 @click.option("--min-icd10-tokens", type=int, default=5, show_default=True)
-@click.option("--val-percent", type=float, default=0.1, show_default=True)
-@click.option("--test-percent", type=float, default=0.2, show_default=True)
+@click.option(
+    "--val-percent", type=click.FloatRange(min=0, max=1), default=0.1, show_default=True
+)
+@click.option(
+    "--test-percent",
+    type=click.FloatRange(min=0, max=1),
+    default=0.2,
+    show_default=True,
+)
 def build_delfi(
     cpr_path: str,
     output_dir: str,
@@ -54,7 +61,7 @@ def build_delfi(
 ):
     cpr = pl.scan_parquet(cpr_path)
     if lsr_path is None and diag_adm_path is None:
-        raise click.UsageError("Either lsr_path or diag_adms_path must be specified")
+        raise click.UsageError("Either lsr_path or diag_adm_path must be specified")
     lsr = pl.scan_parquet(lsr_path) if lsr_path else None
     diag_adms = pl.scan_parquet(diag_adm_path) if diag_adm_path else None
     dataset = build_delfi_dataset(

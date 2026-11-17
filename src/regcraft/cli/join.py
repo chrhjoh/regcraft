@@ -1,14 +1,14 @@
 import click
 
 from regcraft.io import write_parquet
-from regcraft.registries.combine import (
+from regcraft.registries.joins import (
     create_diag_adm,
     create_lsr,
 )
 
 
 @click.group()
-def combine() -> None:
+def join() -> None:
     """Create long versions of LSR and Diag Adms"""
 
 
@@ -25,7 +25,7 @@ _output_file = click.Path(
 )
 
 
-@combine.command("lsr", help="Create combined version of Epikur and Laegemiddelinfo")
+@join.command("lsr", help="Create combined version of Epikur and Laegemiddelinfo")
 @click.argument("epikur_path", type=_input_file)
 @click.argument("laegemiddel_path", type=_input_file)
 @click.argument("output_path", type=_output_file)
@@ -41,7 +41,7 @@ def lsr(epikur_path: str, laegemiddel_path: str, output_path: str, collect: bool
     write_parquet(lsr, output_path, collect=collect)
 
 
-@combine.command(
+@join.command(
     "diag-adm", help="Create combined version of Diag and Adms for LPR2 and LPR3"
 )
 @click.argument("output_path", type=_output_file)

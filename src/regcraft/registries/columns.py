@@ -141,3 +141,39 @@ class EpikurCols(BaseCols):
                 cls.item_id.value: pl.Int32,
             }
         )
+
+
+class LsrCols(BaseCols):
+    cpr_enc = auto()
+    atc = auto()
+    date = auto()
+
+    @classmethod
+    def schema(cls) -> pl.Schema:
+        return pl.Schema(
+            {
+                cls.cpr_enc.value: pl.Utf8,
+                cls.atc.value: pl.Utf8,
+                cls.date.value: pl.Date,
+            }
+        )
+
+
+class DiagAdmCols(BaseCols):
+    cpr_enc = auto()
+    diag = auto()
+    diag_type = auto()
+    date_start = auto()
+    date_end = auto()
+
+    @classmethod
+    def schema(cls) -> pl.Schema:
+        return pl.Schema(
+            {
+                cls.cpr_enc.value: pl.Utf8,
+                cls.diag.value: pl.Utf8,
+                cls.diag_type.value: pl.Utf8,
+                cls.date_start.value: pl.Date,
+                cls.date_end.value: pl.Date,
+            }
+        )
