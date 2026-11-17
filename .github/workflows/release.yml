@@ -45,6 +45,13 @@ jobs:
       - name: Build
         run: uv build
 
+      - name: Test installation
+        run: |
+          uv venv "$RUNNER_TEMP/install-test"
+          uv pip install --python "$RUNNER_TEMP/install-test/bin/python" dist/*.whl
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/install-test/bin/python" -c "import regcraft"
+
       - name: Upload distributions
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
