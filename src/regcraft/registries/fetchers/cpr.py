@@ -1,3 +1,5 @@
+from collections.abc import Mapping
+
 import regcraft.registries.columns as cols
 from regcraft.registries.fetchers.factory import FetcherType, RegistryFetcher, fetcher
 
@@ -6,7 +8,7 @@ from regcraft.registries.fetchers.factory import FetcherType, RegistryFetcher, f
 class CprRegistryFetcher(RegistryFetcher):
     cols = cols.CprCols
 
-    def column_norm_mapping(self):
+    def column_norm_mapping(self) -> Mapping[str, str]:
         cpr_enc = "cpr_enc"
         birthdate = "D_FODDATO"
         status_code = "C_STATUS"
