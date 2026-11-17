@@ -1,3 +1,5 @@
+from collections.abc import Mapping
+
 import polars as pl
 from polars import LazyFrame
 
@@ -9,7 +11,7 @@ from regcraft.registries.fetchers.factory import FetcherType, RegistryFetcher, f
 class Lpr2DiagRegistryFetcher(RegistryFetcher):
     cols = cols.Lpr2DiagCols
 
-    def column_norm_mapping(self):
+    def column_norm_mapping(self) -> Mapping[str, str]:
         record_number = "V_RECNUM"
         diag_type = "C_DIAGTYPE"
         diag = "C_DIAG"
@@ -32,7 +34,7 @@ class Lpr2AdmRegistryFetcher(RegistryFetcher):
             pl.lit(None, dtype=pl.Utf8).alias(self.cols.contact_type),
         )
 
-    def column_norm_mapping(self):
+    def column_norm_mapping(self) -> Mapping[str, str]:
         cpr_enc = "cpr_enc"
         date_start = "D_INDDTO"
         date_end = "D_UDDTO"
@@ -57,7 +59,7 @@ class Lpr3DiagRegistryFetcher(RegistryFetcher):
             pl.lit(None, dtype=pl.Utf8).alias(self.cols.diag_additional),
         ).filter(pl.col(later_disproven).str.to_lowercase().ne("ja").fill_null(True))
 
-    def column_norm_mapping(self):
+    def column_norm_mapping(self) -> Mapping[str, str]:
         record_number = "dw_ek_kontakt"
         diag_type = "diagnosetype"
         diag = "diagnosekode"
@@ -80,7 +82,7 @@ class Lpr3ContactRegistryFetcher(RegistryFetcher):
             pl.lit(None, dtype=pl.Int64).alias(self.cols.patient_type),
         )
 
-    def column_norm_mapping(self):
+    def column_norm_mapping(self) -> Mapping[str, str]:
         cpr_enc = "cpr_enc"
         record_number = "dw_ek_kontakt"
         date_start = "dato_start"

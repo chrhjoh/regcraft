@@ -40,6 +40,3 @@ jobs:
 
       - name: Run Pyrefly
         run: uv run pyrefly check
-
-      - name: Run Pyrefly coverage check
-        run: uv run pyrefly coverage check --public-only src

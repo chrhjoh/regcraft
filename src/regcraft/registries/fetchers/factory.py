@@ -102,7 +102,7 @@ Fetchers: dict[FetcherType, type[RegistryFetcher]] = {}
 
 def fetcher(
     registry_type: FetcherType,
-):
+) -> Callable[[type[RegistryFetcher]], type[RegistryFetcher]]:
     def decorator(registry: type[RegistryFetcher]):
         if registry_type in Fetchers:
             raise ValueError(f"Already registered registry {registry_type}")

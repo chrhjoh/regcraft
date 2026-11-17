@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from pathlib import Path
 
 import polars as pl
@@ -16,7 +17,7 @@ from regcraft.registries.fetchers.factory import (
 class LaegemiddelRegistryFetcher(RegistryFetcher):
     cols = LaegemiddelCols
 
-    def column_norm_mapping(self):
+    def column_norm_mapping(self) -> Mapping[str, str]:
         atc = "atc"
         item_id = "vnr"
         return {atc: self.cols.atc, item_id: self.cols.item_id}
@@ -46,7 +47,7 @@ class LaegemiddelRegistryFetcher(RegistryFetcher):
 class EpikurRegistryFetcher(RegistryFetcher):
     cols = EpikurCols
 
-    def column_norm_mapping(self):
+    def column_norm_mapping(self) -> Mapping[str, str]:
         item_id = "vnr"
         date = "eksd"
         cpr_enc = "cpr_enc"

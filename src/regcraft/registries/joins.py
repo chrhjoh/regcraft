@@ -17,7 +17,7 @@ def _join_select(
     lf2: pl.LazyFrame,
     on: str,
     select: Iterable[str],
-):
+) -> pl.LazyFrame:
     return lf1.join(lf2, on=on).select(select)
 
 
@@ -29,15 +29,21 @@ def _load_join(
     return join_fn(lf1, lf2, **kwargs)
 
 
-def join_lsr(epikur: pl.LazyFrame, laegemiddel: pl.LazyFrame, on=EpikurCols.item_id):
+def join_lsr(
+    epikur: pl.LazyFrame, laegemiddel: pl.LazyFrame, on: str = EpikurCols.item_id
+) -> pl.LazyFrame:
     return _join_select(epikur, laegemiddel, on, LsrCols)
 
 
-def join_diag_adm(diagnoses: pl.LazyFrame, admin: pl.LazyFrame, on: str):
+def join_diag_adm(
+    diagnoses: pl.LazyFrame, admin: pl.LazyFrame, on: str
+) -> pl.LazyFrame:
     return _join_select(diagnoses, admin, on, DiagAdmCols)
 
 
-def create_lsr(epikur: pl.LazyFrame | str, laegemiddel: pl.LazyFrame | str):
+def create_lsr(
+    epikur: pl.LazyFrame | str, laegemiddel: pl.LazyFrame | str
+) -> pl.LazyFrame:
     return _load_join(epikur, laegemiddel, join_lsr)
 
 
@@ -46,7 +52,7 @@ def create_diag_adm(
     lpr2_adm: str | pl.LazyFrame | None,
     lpr3_diag: str | pl.LazyFrame | None,
     lpr3_adm: str | pl.LazyFrame | None,
-):
+) -> pl.LazyFrame:
 
     diag_adm_parts = []
     if lpr2_diag is not None and lpr2_adm is not None:
